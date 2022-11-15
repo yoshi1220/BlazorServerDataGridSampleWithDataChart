@@ -1,0 +1,310 @@
+﻿@page "/datagrid"
+@inject ISalesDetailService SalesDetailService;
+@inject IIgniteUIBlazor IgniteUIBlazor
+@inject IJSRuntime JS
+
+<PageTitle>DataGrid</PageTitle>
+<MudText Typo="Typo.h3" GutterBottom="true">Ignite UI for Blazor New Data Grid Sample</MudText>
+
+@if (_salesDetails != null)
+{
+    <div class="container vertical">
+        <div class="container vertical fill">
+
+            @if (message != "")
+            {
+                <MudAlert Severity="Severity.Success">@message</MudAlert>
+            }
+            else
+            {
+
+                @if (!string.IsNullOrEmpty(message))
+                {
+                    <MudAlert Severity="Severity.Error">@message</MudAlert>
+                }
+            }
+
+
+            <div class="d-flex">
+                <MudTextField @bind-Value="SlipNumber" Label="伝票番号" Variant="Variant.Text" Adornment="Adornment.Start" Class="mx-8" />
+                <MudTextField @bind-Value="RowNumber" Label="行番号" Variant="Variant.Text" Adornment="Adornment.Start" Class="mx-8" />
+            </div>
+            <div class="d-flex">
+                <MudTextField @bind-Value="ItemCode" Label="商品コード" Variant="Variant.Text" Adornment="Adornment.Start" Class="mx-8" />
+                <MudTextField @bind-Value="ItemName" Label="商品名" Variant="Variant.Text" Adornment="Adornment.Start" Class="mx-8" />
+            </div>
+            <div class="d-flex">
+                <MudTextField @bind-Value="Quantity" Label="数量" Variant="Variant.Text" Adornment="Adornment.Start" Class="mx-4" />
+                <MudTextField @bind-Value="UnitPrice" Label="単価" Variant="Variant.Text" Adornment="Adornment.Start" Class="mx-4" />
+                <MudTextField @bind-Value="Amount" Label="金額" Variant="Variant.Text" Adornment="Adornment.Start" Class="mx-4" Disabled="true" />
+                <MudTextField @bind-Value="SalesTax" Label="消費税" Variant="Variant.Text" Adornment="Adornment.Start" Class="mx-4" Disabled="true" />
+            </div>
+
+            <br />
+
+            <div class="d-flex bd-highlight mb-3">
+                <MudButton Variant="Variant.Filled" @onclick="AddNewDataButtonClick">Add Data</MudButton>
+                <MudButton class="ms-auto p-2 bd-highlight" Color="MudBlazor.Color.Dark" Variant="Variant.Filled" @onclick="UpdateDetailsDataButtonClick">Update Details</MudButton>
+
+            </div>
+
+
+            <IgbGrid Data="_salesDetails"
+                 Height="600px"
+                 ValidationStatusChange="OnValidationStatusChange"
+                 CellEdit="OnCellEdit"
+                 CellEditEnter="OnCellEditEnter"
+                 CellEditExit="OnCellEditExit"
+                 DisplayDensity="DisplayDensity.Compact">
+
+                <IgbColumnLayout Header="Header"
+                             Pinned="true">
+                    <IgbColumn Field="SlipNumber"
+                           Width="100px"
+                           RowStart="1"
+                           RowEnd="2"
+                           ColStart="1"
+                           Header="伝票番号"
+                           Editable="false">
+                    </IgbColumn>
+                    <IgbColumn Field="RowNumber"
+                           Width="100px"
+                           RowStart="1"
+                           RowEnd="2"
+                           ColStart="2"
+                           Header="行番号"
+                           Editable="false">
+                    </IgbColumn>
+                </IgbColumnLayout>
+
+                <IgbColumnLayout Header="Detail"
+                             Pinned="true">
+
+                    <IgbColumn Field="ItemCode"
+                           RowStart="1"
+                           ColStart="1"
+                           Header="商品コード"
+                           Editable="true">
+                    </IgbColumn>
+                    <IgbColumn Field="ItemName"
+                           RowStart="2"
+                           ColStart="1"
+                           Header="商品名"
+                           Editable="true">
+                    </IgbColumn>
+
+                    <IgbColumn Field="Quantity"
+                           DataType="GridColumnDataType.Number"
+                           RowStart="1"
+                           ColStart="2"
+                           Header="数量"
+                           Editable="true">
+                    </IgbColumn>
+
+                    <IgbColumn Field="UnitPrice"
+                           DataType="GridColumnDataType.Number"
+                           RowStart="2"
+                           ColStart="2"
+                           Header="単価"
+                           Editable="true">
+                    </IgbColumn>
+
+                    <IgbColumn Field="Amount"
+                           DataType="GridColumnDataType.Number"
+                           RowStart="1"
+                           ColStart="3"
+                           Header="金額"
+                           Editable="false">
+                    </IgbColumn>
+
+                    <IgbColumn Field="SalesTax"
+                           DataType="GridColumnDataType.Number"
+                           RowStart="2"
+                           ColStart="3"
+                           Header="消費税"
+                           Editable="false">
+                    </IgbColumn>
+                </IgbColumnLayout>
+            </IgbGrid>
+
+            <br />
+            <br />
+            <MudButton Variant="Variant.Filled"
+                   @onclick="AddRowButtonClick"
+                   Color="MudBlazor.Color.Primary">Add Row</MudButton>
+
+        </div>
+    </div>
+
+}
+
+@code {
+
+    public int SlipNumber { get; set; }
+
+    public int RowNumber { get; set; } = 1;
+
+    public string ItemCode { get; set; } = "S003";
+
+    public string ItemName { get; set; } = "商品3";
+
+    private decimal _quantity;
+    public decimal Quantity
+    {
+        set
+        {
+            _quantity = value;
+            Amount = Math.Ceiling(Quantity * _unitPrice);
+            SalesTax = Math.Ceiling(Amount * 0.1M);
+        }
+        get
+        {
+            return _quantity;
+        }
+    }
+    public decimal _unitPrice = 0;
+    public decimal UnitPrice
+    {
+        set
+        {
+            _unitPrice = value;
+            Amount = Math.Ceiling(Quantity * _unitPrice);
+            SalesTax = Math.Ceiling(Amount * 0.1M);
+        }
+        get
+        {
+            return _unitPrice;
+        }
+    }
+
+    public decimal Amount { get; set; } = 0;
+
+    public decimal SalesTax { get; set; } = 0;
+
+    private string message ="";
+
+
+    private List<SalesDetailViewModel> _salesDetails = new();
+
+
+    //明細行の追加処理
+    private void AddRowButtonClick()
+    {
+        message = "";
+
+        var tempDetails = new List<SalesDetailViewModel>(_salesDetails);
+
+        var newRow = new SalesDetailViewModel();
+        tempDetails.Add(newRow);
+
+        _salesDetails = tempDetails;
+
+        RowNumber++;
+
+        this.StateHasChanged();
+    }
+
+    //新規データ追加
+    private void AddNewDataButtonClick()
+    {
+        message = "";
+
+
+        var tempDetails = new List<SalesDetailViewModel>(_salesDetails);
+
+        var newRow = new SalesDetailViewModel();
+        newRow.SlipNumber = SlipNumber;
+        newRow.RowNumber = RowNumber;
+        newRow.ItemCode = ItemCode;
+        newRow.ItemName = ItemName;
+        newRow.Quantity = Quantity;
+        newRow.UnitPrice = UnitPrice;
+        newRow.Amount = Amount;
+        newRow.SalesTax = SalesTax;
+
+        tempDetails.Add(newRow);
+
+        _salesDetails = tempDetails;
+
+        RowNumber++;
+
+        this.StateHasChanged();
+    }
+
+    //明細データの更新処理
+    private void UpdateDetailsDataButtonClick()
+    {
+        //処理判定フラグ等の初期化
+        message = "";
+
+        // Mapするモデルの設定
+        var config = new MapperConfiguration(cfg =>
+        {
+            cfg.CreateMap<SalesDetailViewModel, SalesDetail>();
+        });
+
+        // Mapperを作成
+        var mapper = config.CreateMapper();
+        // UserViewModelのデータがUserの型でマッピングされる
+        List<SalesDetail> salesData = new();
+
+        foreach (var item in _salesDetails)
+        {
+            var sale = mapper.Map<SalesDetail>(item);
+            salesData.Add(sale);
+        }
+
+
+        try
+        {
+            SalesDetailService.UpdateAll(salesData);
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            message = ex.ToString();
+            return;
+        }
+
+        //画面に更新成功の表示
+        message = "更新に成功しました";
+        this.StateHasChanged();
+    }
+
+    protected override void OnInitialized()
+    {
+        //売上明細一覧データの取得
+        _salesDetails = SalesDetailService.GetDispAll().ToList();
+
+        //伝票番号の最大値
+        SlipNumber = _salesDetails.Max(n => n.SlipNumber) + 1;
+
+        //数量、単価初期値
+        this.Quantity = 12;
+        this.UnitPrice = 535;
+
+        message = "";
+
+    }
+
+    private async Task OnValidationStatusChange(IgbGridValidationStatusEventArgs args)
+    {
+        await Task.CompletedTask;
+    }
+
+    private async Task OnCellEdit(IgbGridEditEventArgs args)
+    {
+        await Task.CompletedTask;
+    }
+
+    private async Task OnCellEditEnter(IgbGridEditEventArgs args)
+    {
+        await Task.CompletedTask;
+    }
+
+    private async Task OnCellEditExit(IgbGridEditDoneEventArgs args)
+    {
+        await Task.CompletedTask;
+    }
+
+
+}

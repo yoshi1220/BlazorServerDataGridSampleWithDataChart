@@ -1,0 +1,15 @@
+﻿/*
+１．行の区切りがわかりやすいように、明細単位で行を罫線で囲む
+_Layout.cshtml に {アセンブリ名}.styles.css の CSS ファイルを読み込む link 要素を書き足すのも忘れずに。
+*/
+
+/* このセレクタで、ヘッダ行の下枠線をカスタマイズ可能 */
+::deep igx-grid-header-row .igx-grid-thead__wrapper {
+    border-bottom-color: #888;
+    border-bottom-width: 1px;
+}
+
+/* このセレクタで、各データ行の下枠線をカスタマイズ可能 */
+::deep igx-grid-row.igx-grid__tr--mrl.igx-grid__tr {
+    border-bottom-color: #888;
+}

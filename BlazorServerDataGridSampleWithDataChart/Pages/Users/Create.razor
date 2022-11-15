@@ -1,0 +1,86 @@
+﻿@page "/users/create"
+@inject IUserService UserService;
+@inject NavigationManager NavigationManager
+
+<UsersHeader />
+
+<MudText Typo="Typo.h3" GutterBottom="true">ユーザー作成</MudText>
+
+<EditForm Model="@vm" OnValidSubmit="@OnValidSubmit" OnInvalidSubmit="@OnInvalidSubmit">
+
+    <DataAnnotationsValidator />
+
+    <MudTextField Label="名前" Required="true" @bind-Value="vm.UserName" RequiredError="名前を入力してください" />
+    <br />
+    <MudTextField Label="Emailアドレス" Required="true" @bind-Value="vm.MailAddress" RequiredError="Emailアドレスを入力してください" />
+    <br />
+    <MudDatePicker Label="誕生日" @bind-Date="vm.BirthDay" />
+
+    <br />
+
+    @if (success)
+    {
+        <MudText Color="MudBlazor.Color.Success">登録に成功しました</MudText>
+    }
+    else
+    {
+        <MudText Color="@MudBlazor.Color.Error">
+            <ValidationSummary />
+        </MudText>
+    }
+
+    <br />
+
+    <button type="submit" class="btn btn-primary">登録</button>
+
+
+</EditForm>
+
+@code {
+    private UserViewModel vm { get; set; } = null;
+    private bool success = false;
+
+    protected override void OnInitialized()
+    {
+        vm = new UserViewModel();
+    }
+
+    private async Task OnValidSubmit()
+    {
+        // Mapするモデルの設定
+        var config = new MapperConfiguration(cfg =>
+        {
+            cfg.CreateMap<UserViewModel, User>();
+        });
+
+        // Mapperを作成
+        var mapper = config.CreateMapper();
+
+        // UserViewModelのデータがUserの型でマッピングされる
+        var user = mapper.Map<User>(vm);
+
+        UserService.Add(user);
+
+        //画面に登録成功の表示
+        success = true;
+        this.StateHasChanged();
+
+        //2秒待ってから画面を初期化する
+        await Task.Delay(TimeSpan.FromSeconds(2));
+
+        //画面の初期化
+        vm.UserId = 0;
+        vm.UserName = "";
+        vm.MailAddress = "";
+        vm.BirthDay = DateTime.Now.AddYears(-20);
+        success = false;
+        this.StateHasChanged();
+
+    }
+
+    private void OnInvalidSubmit()
+    {
+        success = false;
+    }
+
+}

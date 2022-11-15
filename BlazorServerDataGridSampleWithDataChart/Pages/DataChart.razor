@@ -1,0 +1,99 @@
+﻿@page "/datachart"
+@using IgniteUI.Blazor.Controls
+@inject IIgniteUIBlazor IgniteUIBlazor
+
+<PageTitle>DataChart</PageTitle>
+<MudText Typo="Typo.h3" GutterBottom="true">Ignite UI for Blazor Data Chart Sample</MudText>
+
+
+<div class="container vertical">
+    <div class="options vertical">
+        <span class="legend-title">Facebook Statement of Income 2019-2020</span>
+        <div class="legend">
+            <IgbLegend @ref="Legend" Orientation="LegendOrientation.Horizontal" />
+        </div>
+    </div>
+    <div class="container vertical">
+        <IgbDataChart Height="600px" Width="1200px" Legend="Legend"
+                   IsHorizontalZoomEnabled="false"
+                   IsVerticalZoomEnabled="false">
+
+            <IgbCategoryXAxis Name="xAxis" DataSource="Data" Label="Date" Overlap="0" Gap="0.1" UseClusteringMode="true"/>
+            <IgbNumericYAxis Name="yAxis1" AbbreviateLargeNumbers="true" Title="In Millions of U.S. Dollars1"
+                          MinimumValue="0" MaximumValue="30000000" TitleLeftMargin="5" TitleRightMargin="0"/>
+            <IgbNumericYAxis Name="yAxis2" AbbreviateLargeNumbers="true" Title="In Millions of U.S. Dollars2"
+                          MinimumValue="0" MaximumValue="60000000" TitleLeftMargin="5" TitleRightMargin="0"/>
+            <IgbNumericYAxis Name="yAxis3" AbbreviateLargeNumbers="true" Title="Percentage" MajorStrokeThickness="0"
+                          MinimumValue="0" MaximumValue="160" LabelLocation="AxisLabelsLocation.OutsideRight"
+                          LabelHorizontalAlignment="IgniteUI.Blazor.Controls.HorizontalAlignment.Left"/>
+
+            <IgbColumnSeries @ref="@RevenueSeries" XAxisName="xAxis" YAxisName="yAxis1" DataSource="Data"
+                          ValueMemberPath="Revenue"
+                          Title="Revenue" MarkerType="MarkerType.Hidden"/>
+            <IgbColumnSeries @ref="@ExpenseSeries" XAxisName="xAxis" YAxisName="yAxis2" DataSource="Data"
+                          ValueMemberPath="Expenses"
+                          Title="Expenses" MarkerType="MarkerType.Hidden"/>
+
+            <IgbSplineAreaSeries @ref="@IncomeSeries" XAxisName="xAxis" YAxisName="yAxis3" DataSource="Data"
+                          ValueMemberPath="IncomePerRevenue"
+                          Title="Income / Revenue %" MarkerType="MarkerType.Circle"/>
+
+            <IgbCalloutLayer DataSource="Data" IsAutoCalloutBehaviorEnabled="false" XMemberPath="RevenueX" YMemberPath="Revenue" LabelMemberPath="FormattedRevenue"
+                          TargetSeries="@RevenueSeries"
+                          UseValueForAutoCalloutLabels="false"
+                          CalloutLeaderBrush="Transparent" CalloutTextColor="Black"
+                          CalloutBackground = "Transparent"
+                          CalloutPositionPadding="-5"/>
+
+            <IgbCalloutLayer DataSource="Data" IsAutoCalloutBehaviorEnabled="false" XMemberPath="ExpensesX" YMemberPath="Expenses" LabelMemberPath="FormattedExpenses"
+                          TargetSeries="@ExpenseSeries"
+                          UseValueForAutoCalloutLabels="false"
+                          CalloutLeaderBrush="Transparent" CalloutTextColor="Black"
+                          CalloutBackground = "Transparent"
+                          CalloutPositionPadding="-5"/>
+
+            <IgbCalloutLayer IsAutoCalloutBehaviorEnabled="true" TargetSeries="@IncomeSeries"
+                          UseValueForAutoCalloutLabels="true" ContentMemberPath="IncomePerRevenue"
+                          CalloutLeaderBrush="Transparent" CalloutTextColor="Black"
+                          CalloutBackground = "LightGray" AutoCalloutLabelPrecision="1"/>
+        </IgbDataChart>
+    </div>
+</div>
+
+@code {
+
+    private IgbLegend _legend;
+    private IgbLegend Legend
+    {
+        get { return _legend; }
+        set { _legend = value; StateHasChanged(); }
+    }
+
+    private IgbColumnSeries _RevenueSeries;
+    public IgbColumnSeries RevenueSeries
+    {
+        get { return _RevenueSeries; }
+        set { _RevenueSeries = value; StateHasChanged(); }
+    }
+
+    private IgbColumnSeries _ExpenseSeries;
+    public IgbColumnSeries ExpenseSeries
+    {
+        get { return _ExpenseSeries; }
+        set { _ExpenseSeries = value; StateHasChanged(); }
+    }
+
+    private IgbSplineAreaSeries _IncomeSeries;
+    public IgbSplineAreaSeries IncomeSeries
+    {
+        get { return _IncomeSeries; }
+        set { _IncomeSeries = value; StateHasChanged(); }
+    }
+
+    private List<CompanyBudgetInfoWithFormatting> Data = new CompanyBudgetDataWithFormatting();
+
+    protected override void OnInitialized()
+    {
+
+    }
+}

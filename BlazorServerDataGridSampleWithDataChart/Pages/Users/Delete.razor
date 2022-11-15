@@ -1,0 +1,99 @@
+﻿@page "/users/delete/{UserId}"
+@inject IUserService UserService;
+@inject NavigationManager NavigationManager
+
+<UsersHeader />
+
+<MudText Typo="Typo.h3" GutterBottom="true">ユーザー削除</MudText>
+
+<EditForm Model="@vm" OnValidSubmit="@OnValidSubmit" OnInvalidSubmit="@OnInvalidSubmit">
+
+    <DataAnnotationsValidator />
+    <MudTextField Label="ユーザー番号" Required="true" @bind-Value="vm.UserId" Variant="Variant.Filled" Disabled="true" />
+    <br />
+    <MudTextField Label="名前" Required="true" @bind-Value="vm.UserName" Variant="Variant.Filled" Disabled="true" />
+    <br />
+    <MudTextField Label="Emailアドレス" Required="true" @bind-Value="vm.MailAddress" Variant="Variant.Filled" Disabled="true" />
+    <br />
+    <MudDatePicker Label="誕生日" @bind-Date="vm.BirthDay" Variant="Variant.Filled" Disabled="true" />
+
+    <br />
+
+    @if (success)
+    {
+        <MudText Color="MudBlazor.Color.Success">削除に成功しました</MudText>
+    }
+    else
+    {
+        <MudText Color="@MudBlazor.Color.Error">
+            <ValidationSummary />
+        </MudText>
+    }
+
+    <br />
+
+    <button type="submit" class="btn btn-danger">削除</button>
+
+
+</EditForm>
+
+@code {
+    [Parameter]
+    public string UserId { get; set; }
+    private UserViewModel vm { get; set; } = null;
+    private bool success = false;
+    private int userId;
+
+    protected override void OnInitialized()
+    {
+
+        if (!string.IsNullOrEmpty(UserId) && int.TryParse(UserId, out userId))
+        {
+
+            // Mapするモデルの設定
+            var config = new MapperConfiguration(cfg =>
+            {
+                cfg.CreateMap<User, UserViewModel>();
+            });
+
+            //ユーザー一覧データの取得
+            var user = UserService.Get(userId);
+
+            // Mapperを作成
+            var mapper = config.CreateMapper();
+            // UserのデータがUserViewModelの型でマッピングされる
+            vm = mapper.Map<UserViewModel>(user);
+        }
+    }
+
+    private async Task OnValidSubmit()
+    {
+        // Mapするモデルの設定
+        var config = new MapperConfiguration(cfg =>
+        {
+            cfg.CreateMap<UserViewModel, User>();
+        });
+
+        // Mapperを作成
+        var mapper = config.CreateMapper();
+        // UserViewModelのデータがUserの型でマッピングされる
+        var user = mapper.Map<User>(vm);
+
+        UserService.Remove(userId);
+
+        //画面に削除成功の表示
+        success = true;
+        this.StateHasChanged();
+
+        //2秒待ってからIndexに移動する
+        await Task.Delay(TimeSpan.FromSeconds(2));
+
+        NavigationManager.NavigateTo($"/users/index");
+    }
+
+    private void OnInvalidSubmit()
+    {
+        success = false;
+    }
+
+}
