@@ -1,6 +1,6 @@
-# BlazorServerCRUDSample
+# BlazorServerDataGridSampleWithDataChart
 
-Blazor ServerのCRUDアプリのサンプル
+Blazor ServerのCRUD、多段明細グリッド、3軸DataChartのサンプル
 
 ## Databaseの接続先について
 
