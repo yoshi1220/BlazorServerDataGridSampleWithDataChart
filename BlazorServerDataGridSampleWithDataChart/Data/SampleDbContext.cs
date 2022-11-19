@@ -44,6 +44,24 @@ namespace BlazorServerDataGridSampleWithDataChart.Data
                         BirthDay = new DateTime(2004, 7, 11)
                     }
                 );
+
+            modelBuilder.Entity<SalesDetail>()
+              .ToTable("SalesDetails");
+            modelBuilder.Entity<SalesDetail>()
+                .HasData(
+                    new SalesDetail
+                    {
+                        Id = 1,
+                        SlipNumber = 10001,
+                        RowNumber = 1,
+                        ItemCode = "S001",
+                        ItemName = "商品1",
+                        Quantity = 3,
+                        UnitPrice = 330,
+                        Amount = 990,
+                        SalesTax = 99
+                    }
+                );
         }
     }
 }
